@@ -194,35 +194,156 @@ function getCluesForDifficulty() {
 }
 
 // ============================================================================
+// INVALID MOVE / CONFLICT FUNCTIONS
+// ============================================================================
+
+/**
+ * Get the current values entered on the Sudoku board.
+ */
+function getCurrentBoard() {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+  const board = [];
+
+  for (let row = 0; row < SIZE; row++) {
+    board[row] = [];
+
+    for (let col = 0; col < SIZE; col++) {
+      const idx = row * SIZE + col;
+      const value = inputs[idx].value;
+      board[row][col] = value ? parseInt(value, 10) : 0;
+    }
+  }
+
+  return board;
+}
+
+/**
+ * Find cells that conflict with the value entered at row, col.
+ */
+function findConflicts(board, row, col, value) {
+  const conflicts = [];
+
+  if (!value) {
+    return conflicts;
+  }
+
+  // Check the same row.
+  for (let currentCol = 0; currentCol < SIZE; currentCol++) {
+    if (currentCol !== col && board[row][currentCol] === value) {
+      conflicts.push([row, currentCol]);
+    }
+  }
+
+  // Check the same column.
+  for (let currentRow = 0; currentRow < SIZE; currentRow++) {
+    if (currentRow !== row && board[currentRow][col] === value) {
+      conflicts.push([currentRow, col]);
+    }
+  }
+
+  // Check the same 3x3 box.
+  const boxStartRow = Math.floor(row / 3) * 3;
+  const boxStartCol = Math.floor(col / 3) * 3;
+
+  for (let currentRow = boxStartRow; currentRow < boxStartRow + 3; currentRow++) {
+    for (let currentCol = boxStartCol; currentCol < boxStartCol + 3; currentCol++) {
+      if (
+        (currentRow !== row || currentCol !== col) &&
+        board[currentRow][currentCol] === value
+      ) {
+        conflicts.push([currentRow, currentCol]);
+      }
+    }
+  }
+
+  return conflicts;
+}
+
+/**
+ * Highlight cells involved in an invalid move.
+ */
+function checkConflict(row, col, value) {
+  const boardDiv = document.getElementById('sudoku-board');
+  const inputs = boardDiv.getElementsByTagName('input');
+
+  // Remove previous invalid-entry highlighting.
+  for (let i = 0; i < inputs.length; i++) {
+    inputs[i].classList.remove('invalid-entry');
+  }
+
+  if (!value) {
+    return true;
+  }
+
+  const board = getCurrentBoard();
+  const conflicts = findConflicts(board, row, col, value);
+
+  if (conflicts.length > 0) {
+    // Highlight the newly entered cell.
+    const currentIndex = row * SIZE + col;
+    inputs[currentIndex].classList.add('invalid-entry');
+
+    // Highlight every conflicting cell.
+    conflicts.forEach(([conflictRow, conflictCol]) => {
+      const conflictIndex = conflictRow * SIZE + conflictCol;
+      inputs[conflictIndex].classList.add('invalid-entry');
+    });
+
+    document.getElementById('message').innerText =
+      'Invalid move: conflicting number.';
+    document.getElementById('message').style.color = '#d32f2f';
+
+    return false;
+  }
+
+  document.getElementById('message').innerText = '';
+  return true;
+}
+// ============================================================================
 // BOARD FUNCTIONS
 // ============================================================================
 
 function createBoardElement() {
   const boardDiv = document.getElementById('sudoku-board');
   boardDiv.innerHTML = '';
-  for (let i = 0; i < SIZE; i++) {
+
+  for (let row = 0; row < SIZE; row++) {
     const rowDiv = document.createElement('div');
     rowDiv.className = 'sudoku-row';
-    for (let j = 0; j < SIZE; j++) {
+
+    for (let col = 0; col < SIZE; col++) {
       const input = document.createElement('input');
       input.type = 'text';
       input.maxLength = 1;
-      
-      // Calculate which 3x3 subgrid this cell belongs to
-      const boxRow = Math.floor(i / 3);
-      const boxCol = Math.floor(j / 3);
-      const boxNum = boxRow * 3 + boxCol;
-      const isOddBox = boxNum % 2 === 0; // Boxes 0, 2, 4, 6, 8 are odd
-      
-      input.className = 'sudoku-cell' + (isOddBox ? ' box-odd' : ' box-even');
-      input.dataset.row = i;
-      input.dataset.col = j;
+
+      // Determine which 3x3 Sudoku box this cell belongs to.
+      const boxRow = Math.floor(row / 3);
+      const boxCol = Math.floor(col / 3);
+
+      // Alternate the background color of each 3x3 box.
+      const isShaded = (boxRow + boxCol) % 2 === 0;
+
+      input.className = 'sudoku-cell';
+      input.classList.add(isShaded ? 'box-shade' : 'box-plain');
+
+      input.dataset.row = row;
+      input.dataset.col = col;
+
       input.addEventListener('input', (e) => {
         const val = e.target.value.replace(/[^1-9]/g, '');
         e.target.value = val;
+
+        const value = val ? parseInt(val, 10) : 0;
+
+        // Immediately check whether this entry conflicts
+        // with another number in its row, column, or 3x3 box.
+        checkConflict(row, col, value);
       });
+
       rowDiv.appendChild(input);
     }
+
     boardDiv.appendChild(rowDiv);
   }
 }
@@ -388,10 +509,11 @@ async function checkSolution() {
   for (let idx = 0; idx < inputs.length; idx++) {
     const inp = inputs[idx];
     if (inp.disabled) continue;
-    inp.className = 'sudoku-cell';
     if (incorrect.has(idx)) {
-      inp.className = 'sudoku-cell incorrect';
-    }
+  inp.classList.add('incorrect');
+} else {
+  inp.classList.remove('incorrect');
+}
   }
   if (incorrect.size === 0) {
     msg.style.color = '#388e3c';
