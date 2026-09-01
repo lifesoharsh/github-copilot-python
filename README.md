@@ -6,13 +6,6 @@ Use this simple Sudoku game as a starting point to practice your skills with Git
 
 Follow these instructions to get a copy of the project up and running on your local machine.
 
-### Dependencies
-
-```
-- Modern web browser (Chrome, Firefox, Edge, etc.)
-- Python 3
-```
-
 ### Installation
 
 1. Fork this repository to your GitHub account. (You can use the "Fork" button on the top right corner of the repository page.)
@@ -31,16 +24,47 @@ source .venv/bin/activate
 5. Install required Python packages.
 
 ```bash
-pip install -r requirements.txt
+pip install -r starter/requirements.txt
 ```
 
 6. Run the Flask app.
 
 ```bash
+cd starter
 python app.py
 ```
 
 7. Open http://127.0.0.1:5000 in your browser.
+
+## Running the Baseline Tests
+
+Before starting your refactoring work, run the baseline test suite to establish a functional snapshot of the current application:
+
+1. Navigate to the starter directory:
+
+```bash
+cd starter
+```
+
+2. Run the full test suite:
+
+```bash
+pytest test_sudoku.py -v
+```
+
+3. To run tests with code coverage:
+
+```bash
+pytest test_sudoku.py -v --cov=sudoku_logic --cov=app
+```
+
+4. To run a specific test class:
+
+```bash
+pytest test_sudoku.py::TestBoardCreation -v
+```
+
+**Expected Result:** All 42 baseline tests should pass. This baseline ensures your refactoring doesn't break existing functionality.
 
 ## Project Instructions
 

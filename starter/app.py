@@ -19,7 +19,7 @@ def new_game():
     puzzle, solution = sudoku_logic.generate_puzzle(clues)
     CURRENT['puzzle'] = puzzle
     CURRENT['solution'] = solution
-    return jsonify({'puzzle': puzzle})
+    return jsonify({'puzzle': puzzle, 'solution': solution})
 
 @app.route('/check', methods=['POST'])
 def check_solution():

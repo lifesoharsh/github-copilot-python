@@ -1,18 +1,76 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sudoku Game</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <h1>Sudoku Game</h1>
+  <div class="header">
+    <h1>Sudoku Game</h1>
+    <button id="dark-mode-toggle" class="dark-mode-toggle" title="Toggle Dark Mode">🌙</button>
+  </div>
+  
+  <!-- Difficulty Selection -->
+  <div class="difficulty-section">
+    <fieldset>
+      <legend>Difficulty</legend>
+      <button id="difficulty-easy" class="difficulty-btn active" data-difficulty="easy" aria-pressed="true">Easy</button>
+      <button id="difficulty-medium" class="difficulty-btn" data-difficulty="medium" aria-pressed="false">Medium</button>
+      <button id="difficulty-hard" class="difficulty-btn" data-difficulty="hard" aria-pressed="false">Hard</button>
+    </fieldset>
+  </div>
+
+  <!-- Timer Display -->
+  <div class="timer-section">
+    <span>Time: <span id="timer">0:00</span></span>
+  </div>
+
+  <!-- Sudoku Board -->
   <div id="sudoku-board"></div>
+
+  <!-- Controls and Message -->
   <div class="controls">
     <button id="new-game">New Game</button>
+    <button id="hint-btn">Hint</button>
     <button id="check-solution">Check Solution</button>
     <span id="message"></span>
   </div>
+
+  <!-- Name Input Modal -->
+  <div id="name-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <h2 id="modal-title">You Won!</h2>
+      <p>Enter your name to save your score:</p>
+      <label for="player-name" class="sr-only">Player name</label>
+      <input type="text" id="player-name" placeholder="Your name" maxlength="30" aria-label="Player name for leaderboard">
+      <div class="modal-buttons">
+        <button id="save-score-btn">Save Score</button>
+        <button id="cancel-score-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Section -->
+  <div class="leaderboard-section">
+    <h2>Top 10 Scores</h2>
+    <table id="leaderboard" class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Time</th>
+          <th>Difficulty</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr><td colspan="5">No scores yet. Complete a puzzle to appear here!</td></tr>
+      </tbody>
+    </table>
+  </div>
+
   <script src="/static/main.js"></script>
 </body>
 </html>
